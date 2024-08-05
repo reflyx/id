@@ -12,7 +12,7 @@ import { idServerFactory } from "./lib/id-server.js"
 import { parseArgs } from "jsr:@std/cli/parse-args"
 
 const flags = parseArgs(Deno.args, {
-  string: ["alias", "data", "port"],
+  string: ["alias", "data", "port", "passphrase"],
   alias: {
     p: "port",
     a: "alias",
@@ -23,6 +23,8 @@ const flags = parseArgs(Deno.args, {
     port: "10250",
   },
 })
+
+// Ask passphrase associated with this alias
 
 const store = storeFactory({ path: flags.data, ...flags })
 const crypto = cryptoFactory({ store, ...flags })
