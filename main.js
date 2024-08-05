@@ -10,6 +10,7 @@ import { cryptoFactory } from "./lib/crypto.js"
 import { storeFactory } from "./lib/datastore.js"
 import { idServerFactory } from "./lib/id-server.js"
 import { parseArgs } from "jsr:@std/cli/parse-args"
+import { promptSecret } from "https://deno.land/std@0.224.0/cli/prompt_secret.ts"
 
 const flags = parseArgs(Deno.args, {
   string: ["alias", "data", "port", "passphrase"],
@@ -25,9 +26,17 @@ const flags = parseArgs(Deno.args, {
 })
 
 // Ask passphrase associated with this alias
+if (!flags.passphrase) {
+  flags.passphrase = promptSecret("Please enter your passphrase:")
+}
 
-const store = storeFactory({ path: flags.data, ...flags })
-const crypto = cryptoFactory({ store, ...flags })
-const idServer = idServerFactory({ port: 10250, store, crypto, ...flags })
+try {
+  const store = storeFactory({ path: flags.data, ...flags })
+  const crypto = cryptoFactory({ store, ...flags })
+  const idServer = idServerFactory({ port: 10250, store, crypto, ...flags })
 
-await idServer.start()
+  await idServer.start()
+} catch (err) {
+  console.error("caught main error", err)
+  Deno.exit(1)
+}
